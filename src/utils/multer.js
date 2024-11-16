@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     cb(null, new Date().valueOf() + '.' + file.originalname.split('.').at(-1));
   },
-  limits:{fileSize:'1000000'},
+  limits:{fileSize:'5000000'},
     fileFilter:(req, file, callback)=>{
         const fileType = /jpeg|jpg|png|gif|webp/
         const mimeType = fileType.test(file.mimetype)
@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
         if(mimeType && extname){
             return callback(null, true)
         }
-        callback('File is not image or too big')
+        callback('File is not an image or larger than 5mb')
     }
 });
 

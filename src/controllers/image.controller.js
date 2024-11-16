@@ -1,6 +1,7 @@
 import { ApiError } from '../exceptions/api.error.js';
 import { heroService } from '../services/hero.service.js';
-import fs from 'node:fs/promises'
+
+import { imageService } from '../services/image.service.js';
 
 const get = async (req, res) => {
   const { filename } = req.params;
@@ -35,10 +36,8 @@ const remove = async (req, res) => {
     throw ApiError.BadRequest();
   }
 
-  const path = `./public/images/${image}`;
-
   try {
-    await fs.unlink(path);
+    imageService.removeFS(image);
     await heroService.removeImage(image, id)
 
     res.send([1])

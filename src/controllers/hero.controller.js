@@ -1,5 +1,6 @@
 import { ApiError } from '../exceptions/api.error.js';
 import { heroService } from '../services/hero.service.js';
+import { imageService } from '../services/image.service.js';
 
 const getAll = async (req, res) => {
   const heroes = await heroService.getAll();
@@ -39,14 +40,12 @@ const create = async (req, res) => {
     throw ApiError.BadRequest(
       'Each hero must have: nickname, real_name, origin_description, superpowers, catch_phrase',
     );
-  };
+  }
 
   const existingHero = await heroService.getByNickName(newHeroInfo.nickname);
 
   if (existingHero) {
-    throw ApiError.BadRequest(
-      'Hero must have unique nickname!',
-    );
+    throw ApiError.BadRequest('Hero must have unique nickname!');
   }
 
   const newHero = await heroService.create(newHeroInfo);
@@ -61,6 +60,14 @@ const remove = async (req, res) => {
   if (!id) {
     throw ApiError.BadRequest();
   }
+
+  const hero = await heroService.getOne(id);
+
+  if (!hero) {
+    throw ApiError.NotFound();
+  }
+
+  await imageService.removeBulkFS(hero.images);
 
   const wasDeleted = await heroService.remove(id);
 
@@ -114,6 +121,12 @@ const update = async (req, res) => {
 
   if (!id || Object.keys(newHeroInfo).length === 0) {
     throw ApiError.BadRequest();
+  }
+
+  const existingHero = await heroService.getByNickName(newHeroInfo.nickname);
+
+  if (existingHero) {
+    throw ApiError.BadRequest('Hero must have unique nickname!');
   }
 
   const updatedHero = await heroService.update(newHeroInfo, id);
